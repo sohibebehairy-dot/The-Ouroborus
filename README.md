@@ -1,11 +1,11 @@
-# The-Ouroborus
-# 🌿 SMART Greenhouse
+# 🐍 The-Ouroborus
+## An IoT-Based Automated Greenhouse System Supported by a Mobile Application that Enables Live Monitoring of Temperature, Humidity, and Soil Moisture to Enhance Plant Growth
 
 ---
 
 ## 📖 Project Description
 
-The **SMART Greenhouse** is an IoT-based automated plant monitoring and control system built around the **ESP32 microcontroller**. It continuously reads environmental data — soil moisture, temperature, humidity, and light levels — and responds intelligently to keep your plants in their ideal growing conditions, with or without human intervention.
+The **Ouroborus** is an IoT-based automated plant monitoring and control system built around the **ESP32 microcontroller**. It continuously reads environmental data — soil moisture, temperature, humidity, and light levels — and responds intelligently to keep your plants in their ideal growing conditions, with or without human intervention.
 
 Whether you're growing vegetables, herbs, or ornamental plants, this system takes the guesswork out of plant care by giving you **real-time data**, **automated responses**, and **remote monitoring** — all in one compact, low-cost setup.
 
@@ -15,10 +15,9 @@ Whether you're growing vegetables, herbs, or ornamental plants, this system take
 
 - 💧 **Soil Moisture Monitoring** — Uses a Capacitive Soil Moisture Sensor v1.2 with ADC calibration to accurately measure soil wetness and trigger irrigation automatically.
 - 🌡️ **Temperature & Humidity Sensing** — Reads ambient conditions via a DHT22 sensor and activates fans or heaters to maintain the optimal microclimate.
-- ☀️ **Light Level Detection** — Monitors natural light with an LDR and controls grow lights to ensure plants always get enough light, day or night.
 - 🚿 **Automatic Irrigation** — A relay-controlled water pump activates only when the soil is too dry, saving water and preventing overwatering.
-- 📡 **Wi-Fi Connectivity** — The ESP32 connects to your local network and can send sensor data to a dashboard, MQTT broker, or cloud platform.
-- 📊 **Real-Time Serial Dashboard** — A clean, readable Serial Monitor output lets you observe all sensor readings live during development and testing.
+- 📡 **Wi-Fi Connectivity** — The ESP32 connects to your local network and sends sensor data to the mobile app in real time.
+- 📱 **Mobile Application** — A dedicated app lets you monitor all sensors, control actuators, and receive alerts from anywhere.
 - 🔧 **Easy Calibration** — Built-in calibration mode for the soil moisture sensor ensures accurate readings tailored to your specific soil type.
 
 ---
@@ -30,37 +29,44 @@ Whether you're growing vegetables, herbs, or ornamental plants, this system take
 | ESP32 Dev Board | Main microcontroller & Wi-Fi |
 | Capacitive Soil Moisture Sensor v1.2 | Soil wetness measurement |
 | DHT22 Sensor | Temperature & humidity |
-| LDR (Light Dependent Resistor) | Ambient light level |
 | 5V Relay Module | Controls water pump & grow lights |
 | Mini Water Pump | Automated irrigation |
 | Grow Light / LED Strip | Supplemental plant lighting |
-| 5V Power Supply | Powers the system |
+| 5V/1A & 12V/5A | Powers the system |
 
 ---
 
 ## ⚡ How It Works
 
-1. 🌱 **Sense** — Sensors continuously sample soil moisture, air temperature, humidity, and light every few seconds.
+1. 🌱 **Sense** — Sensors continuously sample soil moisture, air temperature, and humidity every few seconds.
 2. 🧠 **Decide** — The ESP32 compares readings against configurable thresholds (e.g., "if soil moisture < 30%, turn on pump").
-3. ⚙️ **Act** — Relays switch the pump, fan, heater, or grow lights on/off automatically.
-4. 📶 **Report** — Data is sent over Wi-Fi to a dashboard or MQTT broker for remote monitoring and logging.
+3. ⚙️ **Act** — Relays switch the pump, fan, or humidifier on/off automatically.
+4. 📶 **Report** — Data is sent over Wi-Fi to the mobile app for remote monitoring, control, and alerts.
 
 ---
 
 ## 📂 Project Structure
 
 ```
-SMART-Greenhouse/
+Prototype/
 ├── src/
-│   ├── main.ino                  # Main program loop
+│   ├── main.ino                       # Main program loop
 │   ├── soil_moisture_calibration.ino  # Sensor calibration tool
-│   ├── sensors.ino               # Sensor reading functions
-│   └── actuators.ino             # Pump, fan, light control
+│   ├── sensors.ino                    # Sensor reading functions
+│   └── actuators.ino                  # Pump, fan, humidifier control
+├── mobile-app/
+│   ├── lib/
+│   │   ├── screens/                   # Dashboard, alerts, settings screens
+│   │   ├── widgets/                   # Reusable UI components
+│   │   ├── services/                  # MQTT & API service layer
+│   │   └── models/                    # Data models
+│   ├── assets/                        # Icons and images
+│   └── pubspec.yaml                   # Flutter dependencies
 ├── config/
-│   └── config.h                  # Wi-Fi credentials & thresholds
+│   └── config.h                       # Wi-Fi credentials & thresholds
 ├── docs/
-│   └── wiring_diagram.png        # Hardware wiring reference
-└── README.md                     # This file
+│   └── wiring_diagram.png             # Hardware wiring reference
+└── README.md                          # This file
 ```
 
 ---
@@ -70,66 +76,64 @@ SMART-Greenhouse/
 ```
 ESP32 GPIO34  ──→  Soil Moisture Sensor (AOUT)
 ESP32 GPIO4   ──→  DHT22 Data Pin
-ESP32 GPIO35  ──→  LDR Analog Out
 ESP32 GPIO26  ──→  Relay IN1 (Water Pump)
-ESP32 GPIO27  ──→  Relay IN2 (Grow Light)
+ESP32 GPIO27  ──→  Relay IN2 (Humidifer)
 ESP32 3.3V    ──→  Sensors VCC
 ESP32 GND     ──→  Common Ground
+ESP32 VIN     ──→  Pump's VCC  
 ```
 
 ---
 
-## ⚙️ Configuration
+## 📱 Mobile Application
 
-Open `config/config.h` and set your parameters:
+The Ouroborus web-based mobile app is built with **Flutter**, making it available on  **Android**. It connects to the ESP32 via **MQTT** over Wi-Fi, giving you full visibility and control from anywhere.
 
-```cpp
-// Wi-Fi
-#define WIFI_SSID       "YourNetworkName"
-#define WIFI_PASSWORD   "YourPassword"
+### ✨ App Features
 
-// Thresholds
-#define MOISTURE_DRY_THRESHOLD   30.0   // % — pump turns ON below this
-#define MOISTURE_WET_THRESHOLD   60.0   // % — pump turns OFF above this
-#define TEMP_MAX_THRESHOLD       30.0   // °C — fan turns ON above this
-#define LIGHT_MIN_THRESHOLD      400    // ADC — grow light ON below this
+- 📊 **Live Dashboard** — Real-time cards showing soil moisture %, temperature, humidity, and light level, updating every few seconds.
+- 🎛️ **Manual Override** — Toggle the water pump and grow lights on/off directly from the app, overriding automatic mode when needed.
+- 🔔 **Push Notifications** — Instant alerts when a sensor crosses a critical threshold (e.g., soil too dry, temperature too high).
+- 📈 **Historical Charts** — Line graphs showing sensor trends over the past 24 hours, 7 days, or 30 days.
+- ⚙️ **Threshold Settings** — Customize automation thresholds (moisture %, temp °C, light level) directly from the app — no re-uploading code needed.
+- 🌐 **Remote Access** — Works over local Wi-Fi or remotely via a cloud MQTT broker (e.g., HiveMQ, Mosquitto).
+- 🌙 **Dark & Light Mode** — Clean, plant-themed UI available in both dark and light themes.
 
-// Calibration (from your calibration run)
-#define MOISTURE_DRY_VALUE       2750
-#define MOISTURE_WET_VALUE       1200
-```
+### 📲 App Screens
 
----
+| Screen | Description |
+|---|---|
+| 🏠 Dashboard | Live sensor readings and system status at a glance |
+| 💧 Irrigation | Pump status, manual control, and watering history |
+| 🌡️ Climate | Temperature & humidity trends and fan/heater control |
+| ☀️ Lighting | Light level graph and grow light schedule settings |
+| 🔔 Alerts | Notification history and threshold configuration |
+| ⚙️ Settings | Wi-Fi, MQTT broker config, and calibration values |
 
-## 📋 Getting Started
+### 🔧 App Tech Stack
 
-1. **Clone** this repository to your local machine.
-2. **Install** the Arduino IDE and add ESP32 board support.
-3. **Install libraries**: `DHT sensor library`, `Adafruit Unified Sensor`, `PubSubClient` (for MQTT).
-4. **Wire** the hardware following the wiring overview above.
-5. **Run** `soil_moisture_calibration.ino` first to calibrate your sensor.
-6. **Update** `config.h` with your Wi-Fi credentials and calibrated values.
-7. **Upload** `main.ino` to your ESP32 and open Serial Monitor at 115200 baud.
-8. 🌿 **Watch your greenhouse take care of itself!**
+| Layer | Technology |
+|---|---|
+| Framework | Flutter (Dart) |
+| Connectivity | MQTT (`mqtt_client` package) |
+| Charts | `fl_chart` package |
+| Notifications | Firebase Cloud Messaging (FCM) |
+| State Management | Provider / Riverpod |
+| Local Storage | `shared_preferences` |
 
----
+### 📡 Data Format
 
-## 📡 Data & Monitoring
-
-The system publishes sensor readings to an **MQTT broker** every 10 seconds in JSON format:
+The app receives JSON payloads from the ESP32 over MQTT every 10 seconds:
 
 ```json
 {
   "soil_moisture": 45.3,
   "temperature": 24.7,
   "humidity": 62.1,
-  "light_level": 512,
   "pump_state": "OFF",
-  "light_state": "ON"
+  "humidfier": "ON"
 }
 ```
-
-You can visualise this data using **Node-RED**, **Home Assistant**, **Grafana**, or any MQTT-compatible dashboard.
 
 ---
 
