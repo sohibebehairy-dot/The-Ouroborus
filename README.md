@@ -45,32 +45,6 @@ Whether you're growing vegetables, herbs, or ornamental plants, this system take
 
 ---
 
-## 📂 Project Structure
-
-```
-Prototype/
-├── src/
-│   ├── main.ino                       # Main program loop
-│   ├── soil_moisture_calibration.ino  # Sensor calibration tool
-│   ├── sensors.ino                    # Sensor reading functions
-│   └── actuators.ino                  # Pump, fan, humidifier control
-├── mobile-app/
-│   ├── lib/
-│   │   ├── screens/                   # Dashboard, alerts, settings screens
-│   │   ├── widgets/                   # Reusable UI components
-│   │   ├── services/                  # MQTT & API service layer
-│   │   └── models/                    # Data models
-│   ├── assets/                        # Icons and images
-│   └── pubspec.yaml                   # Flutter dependencies
-├── config/
-│   └── config.h                       # Wi-Fi credentials & thresholds
-├── docs/
-│   └── wiring_diagram.png             # Hardware wiring reference
-└── README.md                          # This file
-```
-
----
-
 ## 🔌 Wiring Overview
 
 ```
