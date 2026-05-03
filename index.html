@@ -421,8 +421,13 @@ input[type=range]{flex:1;margin:0 10px;accent-color:var(--acc);height:4px}
 
   <div class="card">
     <div class="ctitle">5-Day Stress Heatmap</div>
-    <div class="hmgrid" id="dynamic-heatmap">
-      <div style="font-size:12px;color:var(--t3);grid-column:1/-1;text-align:center;padding:15px;">Loading Heatmap...</div>
+    <div class="hmgrid">
+      <div></div><div class="hmhdr">9AM</div><div class="hmhdr">10AM</div><div class="hmhdr">11AM</div><div class="hmhdr">12PM</div>
+      <div class="hmlbl">Apr 14</div><div class="hmcell hm-ok"></div><div class="hmcell hm-ok"></div><div class="hmcell hm-warm"></div><div class="hmcell hm-critical"></div>
+      <div class="hmlbl">Apr 15</div><div class="hmcell hm-ok"></div><div class="hmcell hm-ideal"></div><div class="hmcell hm-warm"></div><div class="hmcell hm-warm"></div>
+      <div class="hmlbl">Apr 16</div><div class="hmcell hm-warm"></div><div class="hmcell hm-warm"></div><div class="hmcell hm-critical"></div><div class="hmcell hm-critical"></div>
+      <div class="hmlbl">Apr 17</div><div class="hmcell hm-ok"></div><div class="hmcell hm-warm"></div><div class="hmcell hm-warm"></div><div class="hmcell hm-critical"></div>
+      <div class="hmlbl">Apr 18</div><div class="hmcell hm-ideal"></div><div class="hmcell hm-ok"></div><div class="hmcell hm-warm"></div><div class="hmcell hm-ok"></div>
     </div>
     <div style="display:flex;gap:12px;margin-top:9px;">
       <div style="display:flex;align-items:center;gap:4px;font-size:9.5px;color:var(--t3);"><div style="width:9px;height:9px;border-radius:3px;background:#2d6a4f;"></div>Ideal</div>
@@ -919,8 +924,6 @@ setInterval(fetchStatus, 3000); // Poll status every 3s
 fetchStatus();
 setInterval(fetchAlerts, 5000); // Poll alerts every 5s
 fetchAlerts();
-setInterval(fetchAnalytics, 30000); // Poll analytics every 30s
-fetchAnalytics();
 window.addEventListener('resize', drawChart);
 
 // ── CHATBOT API ──
@@ -973,44 +976,84 @@ async function sendChat() {
   }
 }
 
-let recognition;
+let recognition = null;
+let finalTranscript = '';
+
+function initSpeech() {
+  if (recognition) return true;
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) return false;
+  
+  recognition = new SpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  
+  recognition.onstart = function() {
+    const btn = document.getElementById('micBtn');
+    btn.classList.add('recording');
+    btn.style.color = 'var(--danger)';
+    document.getElementById('chatInp').placeholder = 'Listening... (Tap mic to stop)';
+    vibe();
+  };
+  
+  recognition.onresult = function(event) {
+    let interimTranscript = '';
+    let currentFinal = '';
+    
+    for (let i = event.resultIndex; i < event.results.length; ++i) {
+      if (event.results[i].isFinal) {
+        currentFinal += event.results[i][0].transcript;
+      } else {
+        interimTranscript += event.results[i][0].transcript;
+      }
+    }
+    
+    if (currentFinal) finalTranscript += currentFinal + ' ';
+    document.getElementById('chatInp').value = finalTranscript + interimTranscript;
+  };
+  
+  recognition.onerror = function(event) { 
+    console.error("Speech error:", event.error);
+    const inp = document.getElementById('chatInp');
+    if(event.error === 'not-allowed') {
+      alert("Microphone blocked! Click the lock icon in the URL bar to allow.");
+    } else if(event.error === 'no-speech') {
+      inp.placeholder = 'No speech detected...';
+    } else {
+      inp.value = 'ERROR: ' + event.error;
+    }
+  };
+  
+  recognition.onend = function() {
+    const btn = document.getElementById('micBtn');
+    btn.classList.remove('recording');
+    btn.style.color = 'var(--t2)';
+    document.getElementById('chatInp').placeholder = 'Ask Boro anything...';
+  };
+  
+  return true;
+}
+
 function toggleVoice() {
   const btn = document.getElementById('micBtn');
+  const inp = document.getElementById('chatInp');
+  
   if (btn.classList.contains('recording')) {
     if(recognition) recognition.stop();
     return;
   }
   
-  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+  if (!initSpeech()) {
     alert("Speech recognition not supported in this browser.");
     return;
   }
   
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  recognition = new SpeechRecognition();
-  recognition.continuous = false;
-  recognition.interimResults = false;
+  finalTranscript = inp.value;
+  if (finalTranscript && !finalTranscript.endsWith(' ')) finalTranscript += ' ';
   
-  recognition.onstart = function() {
-    btn.classList.add('recording');
-    btn.style.color = 'var(--danger)';
-    vibe();
-  };
-  
-  recognition.onresult = function(event) {
-    const text = event.results[0][0].transcript;
-    document.getElementById('chatInp').value = text;
-    sendChat();
-  };
-  
-  recognition.onerror = function(event) { console.error("Speech error", event); };
-  
-  recognition.onend = function() {
-    btn.classList.remove('recording');
-    btn.style.color = 'var(--t2)';
-  };
-  
-  recognition.start();
+  try {
+    recognition.start();
+  } catch(e) {}
 }
 
 // ── ALERTS API ──
