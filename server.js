@@ -17,7 +17,10 @@ const PORT = process.env.PORT || 3000;
 // =======================
 
 // ESP32 posts data here
+let lastEspHeartbeat = Date.now();
+
 app.post('/api/data', async (req, res) => {
+  lastEspHeartbeat = Date.now();
   try {
     const { temperature, humidity, soil_moisture, vpd } = req.body;
     
@@ -41,6 +44,12 @@ app.post('/api/data', async (req, res) => {
 // Frontend API Endpoints
 // =======================
 
+// Get system status (Heartbeat)
+app.get('/api/status', (req, res) => {
+  const isOnline = (Date.now() - lastEspHeartbeat) < 15000;
+  res.status(200).json({ online: isOnline, lastSeen: lastEspHeartbeat });
+});
+
 // Get recent sensor data for dashboard
 app.get('/api/data', async (req, res) => {
   try {
@@ -57,6 +66,17 @@ app.get('/api/alerts', async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 10;
     const rows = await dbAll('SELECT * FROM alerts ORDER BY timestamp DESC LIMIT ?', [limit]);
+    res.status(200).json(rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+// Analytics Endpoint (Last 5 Days)
+app.get('/api/analytics', async (req, res) => {
+  try {
+    const fiveDaysAgo = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
+    const rows = await dbAll('SELECT * FROM alerts WHERE timestamp > ? ORDER BY timestamp ASC', [fiveDaysAgo]);
     res.status(200).json(rows);
   } catch (err) {
     res.status(500).json({ error: 'Database error' });

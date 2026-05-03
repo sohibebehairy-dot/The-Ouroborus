@@ -37,7 +37,12 @@ async function handleChat(message) {
       });
     }
 
-    const prompt = `${contextStr}\nUser Message: ${message}\n\nRespond as Boro. Be concise and helpful (under 3 sentences unless a detailed explanation is requested). Use the live data if relevant. You may use an occasional emoji to feel friendly but don't overdo it.`;
+    const prompt = `${contextStr}\nUser Message: ${message}\n\nRespond as Boro. Be concise and helpful (under 3 sentences unless a detailed explanation is requested). Use the live data if relevant. You may use an occasional emoji to feel friendly but don't overdo it.
+If the user asks you to control an actuator (turn on/off the fan, peltier, pump, humidifier, or switch to manual/auto mode), append a command to the VERY END of your response in this exact format:
+[CMD:toggle_actuator:p:true] (where p=peltier/fan, h=humidifier, w=pump, and state is true/false)
+[CMD:switch_mode:auto] (or manual)
+[CMD:emergency_stop]
+Example: "I am turning on the pump for you right now. 💧 [CMD:toggle_actuator:w:true]"`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
