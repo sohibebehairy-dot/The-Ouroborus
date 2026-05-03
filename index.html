@@ -972,6 +972,7 @@ async function sendChat() {
   } catch(e) {
     document.getElementById('typing').remove();
     cb.innerHTML += `<div class="chat-msg ai" style="color:var(--danger)">Connection error. Ensure backend is running.</div>`;
+  }
 }
 
 // ── ALERTS API ──
