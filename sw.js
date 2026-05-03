@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ouroboros-cache-v1';
+const CACHE_NAME = 'ouroboros-cache-v2';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -16,20 +16,19 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // Only intercept GET requests
   if (event.request.method !== 'GET') return;
-  // Ignore API calls for caching
   if (event.request.url.includes('/api/')) return;
 
+  // Network First, fallback to cache
   event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Cache hit - return response
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      })
+    fetch(event.request).then(response => {
+      return caches.open(CACHE_NAME).then(cache => {
+        cache.put(event.request, response.clone());
+        return response;
+      });
+    }).catch(() => {
+      return caches.match(event.request);
+    })
   );
 });
 
