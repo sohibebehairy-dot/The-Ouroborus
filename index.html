@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>The Ouroboros</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #f7f6f2;
+  --bg2:      #ffffff;
+  --bg3:      #eeecea;
+  --card:     #ffffff;
+  --border:   #e6e4dc;
+  --t1:       #19191a;
+  --t2:       #5a5a52;
+  --t3:       #9a9a8a;
+  --acc:      #2d6a4f;
+  --accL:     #52b788;
+  --accBg:    #d8f3dc;
+  --warn:     #d97706;
+  --warnBg:   #fef3e2;
+  --danger:   #c0392b;
+  --dangerBg: #fde8e8;
+  --info:     #2563eb;
+  --navBg:    #ffffff;
+  --navBdr:   #e6e4dc;
+  --shadow:   0 1px 12px rgba(0,0,0,.06);
+  --shadowL:  0 6px 32px rgba(0,0,0,.10);
+  --gtrack:   #e6e4dc;
+  --chartG:   #f0efe9;
+}
+[data-theme=dark] {
+  --bg:       #0e1410;
+  --bg2:      #131a15;
+  --bg3:      #192220;
+  --card:     #1c261e;
+  --border:   #263428;
+  --t1:       #e4ebe2;
+  --t2:       #7a9a7a;
+  --t3:       #446044;
+  --acc:      #52b788;
+  --accL:     #74c69d;
+  --accBg:    #182e22;
+  --warn:     #f59e0b;
+  --warnBg:   #271e0e;
+  --danger:   #ef4444;
+  --dangerBg: #280e0e;
+  --info:     #60a5fa;
+  --navBg:    #131a15;
+  --navBdr:   #263428;
+  --shadow:   0 1px 12px rgba(0,0,0,.3);
+  --shadowL:  0 6px 32px rgba(0,0,0,.45);
+  --gtrack:   #263428;
+  --chartG:   #1c261e;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--t1);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s}
+/* ---- STATUS BAR ---- */
+.sbar{display:flex;justify-content:space-between;align-items:center;padding:10px 18px 6px;font-family:'DM Mono',monospace;font-size:11.5px;color:var(--t3);background:var(--bg);position:sticky;top:0;z-index:200}
+/* ---- PAGE HEADER ---- */
+.phead{padding:6px 18px 14px;background:var(--bg);display:flex;align-items:center;justify-content:space-between}
+.phead h1{font-size:21px;font-weight:700;letter-spacing:-.4px;color:var(--t1)}
+.phead .psub{font-size:11px;color:var(--t3);font-weight:400;margin-top:1px}
+.theme-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;transition:all .2s;box-shadow:var(--shadow)}
+/* ---- SCROLL AREA ---- */
+.pcontent{padding:0 14px;padding-bottom:88px;overflow-y:auto;height:calc(100vh - 118px)}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+/* ---- PAGE ROUTING ---- */
+.page{display:none}.page.active{display:block;animation:fsu .22s ease-out}
+@keyframes fsu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+/* ---- CARD ---- */
+.card{background:var(--card);border-radius:16px;padding:16px;margin-bottom:11px;border:1px solid var(--border);box-shadow:var(--shadow);transition:background .3s,border .3s}
+.ctitle{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--t3);margin-bottom:12px}
+/* ---- BOTTOM NAV ---- */
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--navBg);border-top:1px solid var(--navBdr);display:flex;padding:8px 0 20px;z-index:1000;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 0;cursor:pointer;position:relative}
+.ni svg{width:22px;height:22px;stroke:var(--t3);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s}
+.ni.active svg{stroke:var(--acc)}
+.nlabel{font-size:9.5px;font-weight:500;color:var(--t3);transition:color .2s}
+.ni.active .nlabel{color:var(--acc)}
+.nbadge{position:absolute;top:2px;right:18%;width:7px;height:7px;background:var(--danger);border-radius:50%;border:2px solid var(--navBg)}
+/* ---- GAUGES ---- */
+.ggrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:11px}
+.gc{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:12px 8px;text-align:center;box-shadow:var(--shadow)}
+.gval{font-family:'DM Mono',monospace;font-size:17px;font-weight:500;color:var(--t1);line-height:1}
+.gunit{font-size:9.5px;color:var(--t3);margin-top:2px}
+.glabel{font-size:10px;color:var(--t2);font-weight:500;margin-top:3px}
+/* ---- PILLS ---- */
+.spill{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:100px;font-size:11.5px;font-weight:600}
+.spill.stable{background:var(--accBg);color:var(--acc)}
+.spill.warn{background:var(--warnBg);color:var(--warn)}
+.spill.critical{background:var(--dangerBg);color:var(--danger)}
+.sdot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.sdot.p{animation:pd 1.5s infinite}
+@keyframes pd{0%,100%{opacity:1}50%{opacity:.4}}
+/* ---- ACT STRIP ---- */
+.astrip{display:flex;gap:7px;flex-wrap:wrap}
+.apill{display:flex;align-items:center;gap:4px;padding:5px 9px;border-radius:8px;font-size:10.5px;font-weight:600;background:var(--bg3);color:var(--t2);border:1px solid var(--border);transition:all .3s}
+.apill.on{background:var(--accBg);color:var(--acc);border-color:transparent}
+.adot{width:4px;height:4px;border-radius:50%;background:var(--t3)}
+.apill.on .adot{background:var(--acc);animation:pd 1s infinite}
+/* ---- VPD ROW ---- */
+.vpdrow{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-top:1px solid var(--border);margin-top:11px}
+.vpdlbl{font-size:12px;color:var(--t2);font-weight:500}
+.vpdval{font-family:'DM Mono',monospace;font-size:19px;font-weight:500}
+.vpdzn{font-size:10.5px;padding:3px 8px;border-radius:6px;font-weight:700}
+.vpdzn.opt{background:var(--accBg);color:var(--acc)}
+.vpdzn.hi{background:var(--dangerBg);color:var(--danger)}
+.vpdzn.lo{background:var(--warnBg);color:var(--warn)}
+/* ---- CHART ---- */
+.ctabs{display:flex;gap:3px;margin-bottom:10px;background:var(--bg3);border-radius:10px;padding:3px}
+.ctab{flex:1;text-align:center;font-size:10.5px;font-weight:600;padding:5px 3px;border-radius:7px;cursor:pointer;color:var(--t3);transition:all .2s}
+.ctab.active{background:var(--card);color:var(--acc);box-shadow:var(--shadow)}
+/* ---- SPECIES ---- */
+.sptabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:11px}
+.sptbtn{padding:11px;border-radius:12px;border:2px solid var(--border);background:var(--card);text-align:center;cursor:pointer;font-weight:600;font-size:13px;color:var(--t2);transition:all .2s}
+.sptbtn.active{border-color:var(--acc);color:var(--acc);background:var(--accBg)}
+.cbar-bg{height:7px;background:var(--bg3);border-radius:4px;margin-top:7px;overflow:hidden}
+.cbar-fill{height:100%;border-radius:4px;background:var(--acc);transition:width .8s cubic-bezier(.4,0,.2,1)}
+.cscore{font-family:'DM Mono',monospace;font-size:30px;font-weight:500;color:var(--acc)}
+.sprow{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)}
+.sprow:last-child{border-bottom:none}
+.spname{font-size:12.5px;color:var(--t2);font-weight:500}
+.spbar-w{flex:1;margin:0 10px;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.spbar{height:100%;border-radius:2px;background:var(--acc)}
+.spval{font-family:'DM Mono',monospace;font-size:11.5px;color:var(--t1);font-weight:500;min-width:74px;text-align:right}
+.ststrip{display:flex;gap:3px;margin:11px 0 3px}
+.stbtn{flex:1;padding:6px 3px;border-radius:8px;font-size:9.5px;font-weight:600;text-align:center;background:var(--bg3);color:var(--t3);border:none;cursor:pointer;transition:all .2s}
+.stbtn.active{background:var(--acc);color:#fff}
+.applybtn{width:100%;padding:13px;border-radius:12px;border:none;background:var(--acc);color:#fff;font-size:13.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:space-between;margin-top:14px;transition:opacity .2s;font-family:'Outfit',sans-serif}
+.applybtn:active{opacity:.82}
+/* ---- HEATMAP ---- */
+.hmgrid{display:grid;grid-template-columns:52px repeat(4,1fr);gap:3px;margin-top:8px}
+.hmlbl{color:var(--t3);font-size:9.5px;display:flex;align-items:center}
+.hmhdr{color:var(--t3);font-size:9px;text-align:center;padding:2px 0;font-family:'DM Mono',monospace}
+.hmcell{height:26px;border-radius:5px}
+.hm-ideal{background:#2d6a4f}.hm-warm{background:#f59e0b}.hm-critical{background:#ef4444}.hm-ok{background:#52b788}
+/* ---- ALERT CARDS ---- */
+.altcard{background:var(--card);border-radius:13px;padding:13px;margin-bottom:9px;border:1px solid var(--border);border-left:3px solid var(--acc)}
+.altcard.w{border-left-color:var(--warn)}
+.altcard.d{border-left-color:var(--danger)}
+.altcard.i{border-left-color:var(--info)}
+.alth{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;gap:6px}
+.alttitle{font-size:12.5px;font-weight:700}
+.altres{font-size:9.5px;font-weight:700;color:var(--acc);background:var(--accBg);padding:2px 7px;border-radius:5px;white-space:nowrap}
+.alttime{font-size:10px;color:var(--t3);font-family:'DM Mono',monospace}
+.xaibox{background:var(--bg3);border-radius:8px;padding:9px;font-size:11.5px;color:var(--t2);line-height:1.55;margin:7px 0}
+.atags{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.atag{font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:5px;background:var(--accBg);color:var(--acc)}
+.atag.rec{background:var(--bg3);color:var(--t2)}
+/* ---- CONTROL ---- */
+.msw{display:flex;background:var(--bg3);border-radius:12px;padding:3px;margin-bottom:13px}
+.mbtn{flex:1;padding:9px;border-radius:9px;border:none;font-size:12.5px;font-weight:600;cursor:pointer;background:transparent;color:var(--t3);transition:all .25s;font-family:'Outfit',sans-serif}
+.mbtn.active{background:var(--card);color:var(--acc);box-shadow:var(--shadow)}
+.actcard{display:flex;align-items:center;padding:14px 16px;background:var(--card);border-radius:13px;border:1px solid var(--border);margin-bottom:9px;gap:13px;box-shadow:var(--shadow)}
+.aiwrap{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.aiwrap.p{background:#dbeafe}.aiwrap.h{background:#e0f2fe}.aiwrap.w{background:#dcfce7}
+[data-theme=dark] .aiwrap.p{background:#1e3a5f}[data-theme=dark] .aiwrap.h{background:#0c2340}[data-theme=dark] .aiwrap.w{background:#0a2818}
+.ainame{font-size:13.5px;font-weight:600}.aidet{font-size:10.5px;color:var(--t3);margin-top:1px}
+/* ---- TOGGLE ---- */
+.tgl{width:46px;height:26px;border-radius:13px;background:var(--bg3);border:2px solid var(--border);position:relative;cursor:pointer;transition:all .3s;flex-shrink:0}
+.tgl.on{background:var(--acc);border-color:var(--acc)}
+.tknob{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 5px rgba(0,0,0,.2);transition:left .22s cubic-bezier(.4,0,.2,1)}
+.tgl.on .tknob{left:22px}
+.tdraw{font-family:'DM Mono',monospace;font-size:30px;font-weight:500;color:var(--warn)}
+.pbar-w{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin:10px 0 3px}
+.pbar-f{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--acc),var(--warn));transition:width .5s}
+.sprow2{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)}
+.sprow2:last-child{border-bottom:none}
+.sp2lbl{font-size:11.5px;font-weight:500;color:var(--t2);flex:0 0 82px}
+.sp2val{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--t1);min-width:44px;text-align:right}
+input[type=range]{flex:1;margin:0 10px;accent-color:var(--acc);height:4px}
+.rulecard{background:var(--bg3);border-radius:9px;padding:9px 13px;margin-bottom:7px;font-size:11.5px}
+.rif{color:var(--info);font-weight:700}.rthen{color:var(--acc);font-weight:700}
+.rmeta{font-size:9.5px;color:var(--t3);margin-top:3px;font-family:'DM Mono',monospace}
+.estop{width:100%;padding:14px;border-radius:13px;border:2px solid var(--danger);background:var(--dangerBg);color:var(--danger);font-size:13.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;margin-top:13px;transition:all .2s;font-family:'Outfit',sans-serif}
+.estop:active{background:var(--danger);color:#fff}
+/* ---- TIMELINE ---- */
+.stprog{display:flex;gap:3px;margin:9px 0 3px}
+.sseg{flex:1;height:5px;border-radius:3px;background:var(--bg3)}
+.sseg.done{background:var(--acc)}.sseg.cur{background:var(--accL)}
+.tlwrap{position:relative;padding-left:20px}
+.tlwrap::before{content:'';position:absolute;left:6px;top:0;bottom:0;width:2px;background:var(--border)}
+.tlentry{position:relative;margin-bottom:12px}
+.tldot{position:absolute;left:-18px;top:4px;width:11px;height:11px;border-radius:50%;background:var(--card);border:2px solid var(--border)}
+.tldot.cr{border-color:var(--danger);background:var(--dangerBg)}.tldot.wa{border-color:var(--warn);background:var(--warnBg)}.tldot.ok{border-color:var(--acc);background:var(--accBg)}
+.tlcard{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:11px 13px}
+.tldate{font-size:10px;color:var(--t3);font-family:'DM Mono',monospace;margin-bottom:3px}
+.tltitle{font-size:12.5px;font-weight:700;margin-bottom:5px}.tldesc{font-size:11.5px;color:var(--t2);line-height:1.5}
+/* ---- SETTINGS ---- */
+.srow{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.srow:last-child{border-bottom:none}
+.srlbl{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:500}
+.sico{width:30px;height:30px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:14px}
+.srval{font-size:11px;color:var(--t3);font-family:'DM Mono',monospace}
+.tccard{display:flex;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)}
+.tccard:last-child{border-bottom:none}
+.tcname{font-size:12px;font-weight:700}.tcdet{font-size:10.5px;color:var(--t3);margin-top:1px}
+.tcbadge{font-size:9.5px;color:var(--acc);background:var(--accBg);padding:2px 7px;border-radius:5px;font-weight:700;font-family:'DM Mono',monospace;white-space:nowrap;margin-left:auto}
+.teamcard{display:flex;align-items:center;gap:13px;padding:14px;background:var(--accBg);border-radius:14px;margin-bottom:11px;border:1px solid var(--acc)}
+.tlogo{width:46px;height:46px;border-radius:11px;background:var(--acc);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:11px;flex-shrink:0;text-align:center;line-height:1.3}
+.tname{font-size:13.5px;font-weight:700;color:var(--acc)}.tdet{font-size:10.5px;color:var(--t2);margin-top:2px}
+/* ---- MISC ---- */
+.sec-lbl{font-size:10.5px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin:16px 0 7px}
+.live-tag{display:inline-flex;align-items:center;gap:4px;font-size:9.5px;font-weight:700;color:var(--acc);letter-spacing:.4px;text-transform:uppercase}
+.ldot{width:5px;height:5px;border-radius:50%;background:var(--acc);animation:pd 1s infinite}
+.conn-badge{display:flex;align-items:center;gap:4px;font-size:10.5px}
+.cdot{width:5px;height:5px;border-radius:50%;background:var(--accL);animation:pd 2s infinite}
+.avg-num{font-family:'DM Mono',monospace;font-size:38px;font-weight:400;color:var(--acc)}
+/* ---- CHATBOT ---- */
+.chat-fab { position:fixed; bottom:85px; left:50%; transform:translateX(-50%); width:56px; height:56px; background:linear-gradient(135deg, var(--accL), var(--acc)); border-radius:50%; box-shadow:0 8px 32px rgba(45,106,79,0.4); display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:1001; font-size:26px; transition:all 0.3s cubic-bezier(0.4,0,0.2,1); border:2px solid var(--bg); }
+.chat-fab::after { content:''; position:absolute; top:-4px; left:-4px; right:-4px; bottom:-4px; border-radius:50%; border:1px solid var(--acc); animation: ripple 2s infinite cubic-bezier(0.4,0,0.2,1); }
+@keyframes ripple { 0% { transform:scale(1); opacity:0.8; } 100% { transform:scale(1.4); opacity:0; } }
+.chat-fab:active { transform:translateX(-50%) scale(0.9); }
+.chat-win { position:fixed; bottom:15px; left:15px; right:15px; height:460px; max-width:400px; margin:0 auto; background:var(--card); border:1px solid var(--border); border-radius:20px; box-shadow:var(--shadowL); z-index:1002; display:flex; flex-direction:column; overflow:hidden; transform-origin:bottom center; transition:all 0.4s cubic-bezier(0.4,0,0.2,1); opacity:0; pointer-events:none; transform:translateY(20px) scale(0.95); }
+.chat-win.open { opacity:1; pointer-events:all; transform:translateY(0) scale(1); }
+.chat-head { padding:14px 16px; background:linear-gradient(135deg, var(--acc), #1b4332); color:#fff; font-weight:700; font-size:14px; display:flex; justify-content:space-between; align-items:center; }
+.chat-head-info { display:flex; align-items:center; gap:10px; }
+.chat-avatar { width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center; font-size:18px; }
+.chat-head-text { display:flex; flex-direction:column; }
+.chat-name { font-size:14px; font-weight:700; }
+.chat-status { font-size:10px; opacity:0.8; font-weight:400; }
+.chat-close { cursor:pointer; font-size:22px; line-height:1; }
+.chat-body { flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:8px; background:var(--bg); }
+.chat-msg { padding:8px 12px; border-radius:12px; font-size:12.5px; line-height:1.4; max-width:85%; word-wrap:break-word; }
+.chat-msg.user { background:var(--acc); color:#fff; align-self:flex-end; border-bottom-right-radius:2px; }
+.chat-msg.ai { background:var(--bg3); color:var(--t1); align-self:flex-start; border-bottom-left-radius:2px; }
+.chat-input { display:flex; padding:8px; border-top:1px solid var(--border); background:var(--card); gap:6px; }
+.chat-input input { flex:1; padding:8px 12px; border:1px solid var(--border); border-radius:20px; font-size:13px; background:var(--bg); color:var(--t1); outline:none; font-family:'Outfit',sans-serif; }
+.chat-input button { width:36px; height:36px; border-radius:50%; background:var(--acc); border:none; color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+.typing-dot { width:4px; height:4px; border-radius:50%; background:currentColor; animation:pd 1s infinite; display:inline-block; margin:0 1px; }
+
+/* ---- LOADING SCREEN ---- */
+.loader-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:opacity 0.6s ease, visibility 0.6s; }
+.loader-overlay.hidden { opacity:0; visibility:hidden; pointer-events:none; }
+.ouroboros-img { width:150px; height:150px; animation:spin 3.5s linear infinite; object-fit:contain; mix-blend-mode:multiply; }
+@keyframes spin { 100% { transform:rotate(360deg); } }
+.loader-text { margin-top:24px; font-family:'DM Mono',monospace; font-size:12px; color:var(--acc); letter-spacing:3px; text-transform:uppercase; font-weight:500; animation:pd 1.5s infinite; }
+
+/* Chart Tooltip */
+.ctooltip { position:absolute; pointer-events:none; background:var(--t1); color:var(--bg); padding:4px 8px; border-radius:6px; font-family:'DM Mono',monospace; font-size:10px; font-weight:500; transform:translate(-50%, -100%); margin-top:-8px; opacity:0; transition:opacity 0.1s; z-index:10; white-space:nowrap; box-shadow:var(--shadowL); }
+.ctooltip::after { content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%); border-width:4px; border-style:solid; border-color:var(--t1) transparent transparent transparent; }
+.crosshair { position:absolute; top:0; bottom:0; width:1px; background:var(--acc); pointer-events:none; opacity:0; transition:opacity 0.1s; z-index:9; }
+</style>
+</head>
+<body data-theme="light">
+
+<!-- LOADING SCREEN -->
+<div class="loader-overlay" id="loaderOverlay">
+  <img src="ouroboros_logo.png" alt="Ouroboros Logo" class="ouroboros-img">
+  <div class="loader-text">Initializing AI Core...</div>
+</div>
+
+<!-- STATUS BAR -->
+<div class="sbar">
+  <span id="clk">09:41</span>
+  <div class="conn-badge"><span class="cdot"></span><span id="cip">192.168.1.42</span></div>
+  <span>WiFi ▪ 100%</span>
+</div>
+
+<!-- PAGE HEADER -->
+<div class="phead" id="phead">
+  <div>
+    <h1 id="ptitle">The Ouroboros</h1>
+    <div class="psub" id="psub">Live greenhouse dashboard</div>
+  </div>
+  <button class="theme-btn" onclick="toggleTheme()" id="tbtn">🌙</button>
+</div>
+
+<!-- SCROLL AREA -->
+<div class="pcontent">
+
+<!-- ═══════════════ DASHBOARD ═══════════════ -->
+<div class="page active" id="page-dash">
+
+  <div class="card" style="padding:13px 16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <span id="mstatus" class="spill stable"><span class="sdot p"></span>System Stable</span>
+      <span class="live-tag"><span class="ldot"></span>LIVE</span>
+    </div>
+    <div class="ggrid">
+      <div class="gc">
+        <svg viewBox="0 0 72 42" width="72" height="42" style="display:block;margin:0 auto 3px">
+          <path d="M8 38 A30 30 0 0 1 64 38" fill="none" stroke="var(--gtrack)" stroke-width="6" stroke-linecap="round"/>
+          <path id="g-temp" d="M8 38 A30 30 0 0 1 64 38" fill="none" stroke="#e07a24" stroke-width="6" stroke-linecap="round" stroke-dasharray="94.25" stroke-dashoffset="50"/>
+        </svg>
+        <div class="gval" id="v-temp">26.0</div><div class="gunit">°C</div><div class="glabel">Temp</div>
+      </div>
+      <div class="gc">
+        <svg viewBox="0 0 72 42" width="72" height="42" style="display:block;margin:0 auto 3px">
+          <path d="M8 38 A30 30 0 0 1 64 38" fill="none" stroke="var(--gtrack)" stroke-width="6" stroke-linecap="round"/>
+          <path id="g-hum" d="M8 38 A30 30 0 0 1 64 38" fill="none" stroke="#2563eb" stroke-width="6" stroke-linecap="round" stroke-dasharray="94.25" stroke-dashoffset="38"/>
+        </svg>
+        <div class="gval" id="v-hum">60</div><div class="gunit">%RH</div><div class="glabel">Humidity</div>
+      </div>
+      <div class="gc">
+        <svg viewBox="0 0 72 42" width="72" height="42" style="display:block;margin:0 auto 3px">
+          <path d="M8 38 A30 30 0 0 1 64 38" fill="none" stroke="var(--gtrack)" stroke-width="6" stroke-linecap="round"/>
+          <path id="g-soil" d="M8 38 A30 30 0 0 1 64 38" fill="none" stroke="#52b788" stroke-width="6" stroke-linecap="round" stroke-dasharray="94.25" stroke-dashoffset="47"/>
+        </svg>
+        <div class="gval" id="v-soil">60</div><div class="gunit">%SM</div><div class="glabel">Soil</div>
+      </div>
+    </div>
+    <div class="vpdrow">
+      <span class="vpdlbl">VPD</span>
+      <span class="vpdval" id="v-vpd">1.34</span>
+      <span class="vpdzn opt" id="vpdzone">Optimal</span>
+    </div>
+  </div>
+
+  <div class="card" style="padding:0; background:transparent; border:none; box-shadow:none; margin-bottom:11px;">
+    <button onclick="toggleChat()" style="width:100%; padding:14px; background:linear-gradient(135deg, var(--accL), var(--acc)); color:#fff; border:none; border-radius:14px; font-family:'Outfit',sans-serif; font-weight:700; font-size:15px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 6px 20px rgba(45,106,79,0.3); transition:transform 0.2s; -webkit-tap-highlight-color:transparent;">
+      🐍 Chat with Boro AI
+    </button>
+  </div>
+
+  <div class="card">
+    <div class="ctitle">Actuator Status</div>
+    <div class="astrip">
+      <div class="apill" id="p-fan"><span class="adot"></span>Fan</div>
+      <div class="apill" id="p-peltier"><span class="adot"></span>Peltier</div>
+      <div class="apill on" id="p-humid"><span class="adot"></span>Humidifier</div>
+      <div class="apill" id="p-pump"><span class="adot"></span>Pump</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle">Parameter Trend — Last 30 readings</div>
+    <div class="ctabs">
+      <div class="ctab active" onclick="cTab(0,this)">Temp</div>
+      <div class="ctab" onclick="cTab(1,this)">Humidity</div>
+      <div class="ctab" onclick="cTab(2,this)">Soil</div>
+      <div class="ctab" onclick="cTab(3,this)">VPD</div>
+    </div>
+    <div style="position:relative;height:240px;margin-top:10px;touch-action:none;" id="chartWrap">
+      <canvas id="mchart" style="width:100%;height:240px;"></canvas>
+      <div class="crosshair" id="cCrosshair"></div>
+      <div class="ctooltip" id="cTooltip"></div>
+    </div>
+  </div>
+
+  <div class="card" style="padding:13px 16px;">
+    <div class="ctitle">Active Species</div>
+    <div style="display:flex;gap:9px;">
+      <div style="flex:1;background:var(--bg3);border-radius:10px;padding:11px;text-align:center;">
+        <div style="font-size:22px;margin-bottom:3px;">🍅</div>
+        <div style="font-size:12px;font-weight:700;">Tomato</div>
+        <div style="font-size:9.5px;color:var(--acc);margin-top:3px;background:var(--accBg);border-radius:5px;padding:2px 6px;display:inline-block;">Vegetative</div>
+      </div>
+      <div style="flex:1;background:var(--bg3);border-radius:10px;padding:11px;text-align:center;">
+        <div style="font-size:22px;margin-bottom:3px;">🌶️</div>
+        <div style="font-size:12px;font-weight:700;">Bell Pepper</div>
+        <div style="font-size:9.5px;color:var(--warn);margin-top:3px;background:var(--warnBg);border-radius:5px;padding:2px 6px;display:inline-block;">Seedling</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════ SPECIES ═══════════════ -->
+<div class="page" id="page-species">
+  <div class="sptabs">
+    <div class="sptbtn active" onclick="swSp('tomato',this)">🍅 Tomato</div>
+    <div class="sptbtn" onclick="swSp('pepper',this)">🌶️ Bell Pepper</div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Current Compatibility Score</div>
+    <div class="cscore" id="csc">74%</div>
+    <div style="font-size:11px;color:var(--t3);margin-top:1px;" id="cscnote">Good — temp slightly elevated</div>
+    <div class="cbar-bg"><div class="cbar-fill" id="cbar" style="width:74%"></div></div>
+  </div>
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:11px;margin-bottom:13px;">
+      <div style="font-size:30px;" id="sp-ico">🍅</div>
+      <div>
+        <div style="font-size:15.5px;font-weight:700;" id="sp-nm">Tomato</div>
+        <div style="font-size:11px;color:var(--t3);" id="sp-sci">Solanum lycopersicum</div>
+      </div>
+    </div>
+    <div class="ststrip">
+      <button class="stbtn" onclick="swSt(0,this)">Seeding</button>
+      <button class="stbtn active" onclick="swSt(1,this)">Vegetative</button>
+      <button class="stbtn" onclick="swSt(2,this)">Flowering</button>
+      <button class="stbtn" onclick="swSt(3,this)">Fruiting</button>
+    </div>
+    <div style="margin-top:13px;">
+      <div class="sprow"><span class="spname">Temp</span><div class="spbar-w"><div class="spbar" id="sb-t" style="width:60%"></div></div><span class="spval" id="sv-t">21–27°C</span></div>
+      <div class="sprow"><span class="spname">Humidity</span><div class="spbar-w"><div class="spbar" id="sb-h" style="width:70%"></div></div><span class="spval" id="sv-h">65–75%</span></div>
+      <div class="sprow"><span class="spname">Soil moist.</span><div class="spbar-w"><div class="spbar" id="sb-s" style="width:65%"></div></div><span class="spval" id="sv-s">60–80%</span></div>
+      <div class="sprow"><span class="spname">VPD</span><div class="spbar-w"><div class="spbar" id="sb-v" style="width:38%"></div></div><span class="spval" id="sv-v">0.8–1.2 kPa</span></div>
+    </div>
+  </div>
+  <button class="applybtn" onclick="applySetpoints()">
+    <span>Push setpoints to ESP32</span><span>Apply →</span>
+  </button>
+</div>
+
+<!-- ═══════════════ ALERTS ═══════════════ -->
+<div class="page" id="page-alerts">
+  <div class="card">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+      <div>
+        <div class="ctitle" style="margin-bottom:3px;">Avg Response Time</div>
+        <div style="display:flex;align-items:baseline;gap:4px;">
+          <span class="avg-num">16.77</span>
+          <span style="font-size:17px;color:var(--t2);font-family:'DM Mono',monospace;">s</span>
+        </div>
+        <div style="font-size:10.5px;color:var(--t3);margin-top:2px;">13 events · 5 days</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:10px;color:var(--t3);">Total runtime</div>
+        <div style="font-family:'DM Mono',monospace;font-size:19px;font-weight:500;color:var(--acc);">218s</div>
+        <div style="font-size:10px;color:var(--t3);">∑ recovery</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle">5-Day Stress Heatmap</div>
+    <div class="hmgrid">
+      <div></div><div class="hmhdr">9AM</div><div class="hmhdr">10AM</div><div class="hmhdr">11AM</div><div class="hmhdr">12PM</div>
+      <div class="hmlbl">Apr 14</div><div class="hmcell hm-ok"></div><div class="hmcell hm-ok"></div><div class="hmcell hm-warm"></div><div class="hmcell hm-critical"></div>
+      <div class="hmlbl">Apr 15</div><div class="hmcell hm-ok"></div><div class="hmcell hm-ideal"></div><div class="hmcell hm-warm"></div><div class="hmcell hm-warm"></div>
+      <div class="hmlbl">Apr 16</div><div class="hmcell hm-warm"></div><div class="hmcell hm-warm"></div><div class="hmcell hm-critical"></div><div class="hmcell hm-critical"></div>
+      <div class="hmlbl">Apr 17</div><div class="hmcell hm-ok"></div><div class="hmcell hm-warm"></div><div class="hmcell hm-warm"></div><div class="hmcell hm-critical"></div>
+      <div class="hmlbl">Apr 18</div><div class="hmcell hm-ideal"></div><div class="hmcell hm-ok"></div><div class="hmcell hm-warm"></div><div class="hmcell hm-ok"></div>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:9px;">
+      <div style="display:flex;align-items:center;gap:4px;font-size:9.5px;color:var(--t3);"><div style="width:9px;height:9px;border-radius:3px;background:#2d6a4f;"></div>Ideal</div>
+      <div style="display:flex;align-items:center;gap:4px;font-size:9.5px;color:var(--t3);"><div style="width:9px;height:9px;border-radius:3px;background:#52b788;"></div>OK</div>
+      <div style="display:flex;align-items:center;gap:4px;font-size:9.5px;color:var(--t3);"><div style="width:9px;height:9px;border-radius:3px;background:#f59e0b;"></div>Warm/Dry</div>
+      <div style="display:flex;align-items:center;gap:4px;font-size:9.5px;color:var(--t3);"><div style="width:9px;height:9px;border-radius:3px;background:#ef4444;"></div>Critical</div>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin:16px 0 7px;">
+    <div class="sec-lbl" style="margin:0;">Live XAI Log</div>
+    <button onclick="clearAlerts()" style="font-size:10px;color:var(--danger);background:var(--dangerBg);border:none;padding:4px 10px;border-radius:7px;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:600;">Clear All</button>
+  </div>
+  <div id="dynamic-alerts">
+    <div style="font-size:12px; color:var(--t3); text-align:center; padding:20px;">Loading Live XAI Alerts...</div>
+  </div>
+</div>
+
+<!-- ═══════════════ CONTROL ═══════════════ -->
+<div class="page" id="page-control">
+  <div class="msw">
+    <button class="mbtn active" id="m-auto" onclick="swMode('auto')">⚡ Automatic</button>
+    <button class="mbtn" id="m-man" onclick="swMode('manual')">🎛️ Manual</button>
+  </div>
+  <div class="sec-lbl">Actuator Control</div>
+  <div class="actcard">
+    <div class="aiwrap p">❄️</div>
+    <div style="flex:1;"><div class="ainame">Peltier + Fan</div><div class="aidet" id="pd">60W + 3W = 63W total</div></div>
+    <div class="tgl" id="tg-p" onclick="togAct('p')"><div class="tknob"></div></div>
+  </div>
+  <div class="actcard">
+    <div class="aiwrap h">💧</div>
+    <div style="flex:1;"><div class="ainame">Humidifier</div><div class="aidet">1.75W · relay channel 1</div></div>
+    <div class="tgl on" id="tg-h" onclick="togAct('h')"><div class="tknob"></div></div>
+  </div>
+  <div class="actcard">
+    <div class="aiwrap w">🌊</div>
+    <div style="flex:1;"><div class="ainame">Water Pump</div><div class="aidet">1.25W · relay channel 2</div></div>
+    <div class="tgl" id="tg-w" onclick="togAct('w')"><div class="tknob"></div></div>
+  </div>
+  <div class="card" style="margin-top:3px;">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;">
+      <span class="ctitle" style="margin-bottom:0;">Total Draw Right Now</span>
+      <span class="tdraw" id="tdraw">1.75W</span>
+    </div>
+    <div class="pbar-w"><div class="pbar-f" id="pbar" style="width:2.7%"></div></div>
+    <div style="display:flex;justify-content:space-between;">
+      <span style="font-size:9.5px;color:var(--t3);">0W</span>
+      <span style="font-size:9.5px;color:var(--t3);">of 66W system capacity</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Setpoint Editor</div>
+    <div class="sprow2">
+      <span class="sp2lbl">Temp max</span>
+      <input type="range" id="inp-t" min="20" max="35" value="28" oninput="document.getElementById('sp2-t').textContent=this.value+'°C'">
+      <span class="sp2val" id="sp2-t">28°C</span>
+    </div>
+    <div class="sprow2">
+      <span class="sp2lbl">Humidity min</span>
+      <input type="range" id="inp-h" min="40" max="80" value="55" oninput="document.getElementById('sp2-h').textContent=this.value+'%'">
+      <span class="sp2val" id="sp2-h">55%</span>
+    </div>
+    <div class="sprow2">
+      <span class="sp2lbl">Moisture min</span>
+      <input type="range" id="inp-s" min="30" max="80" value="50" oninput="document.getElementById('sp2-s').textContent=this.value+'%'">
+      <span class="sp2val" id="sp2-s">50%</span>
+    </div>
+    <button class="applybtn" style="margin-top:14px; padding:10px; font-size:12px;" onclick="saveManualSetpoints(this)">Save Thresholds</button>
+  </div>
+  <div id="rules-section">
+    <div class="sec-lbl">Active IF–THEN Rules</div>
+    <div class="rulecard"><span class="rif">IF</span> Temp &gt; 28°C → <span class="rthen">Peltier + Fan ON</span><div class="rmeta">Last: Apr 18 · 11AM · 7× today</div></div>
+    <div class="rulecard"><span class="rif">IF</span> RH &lt; 55% → <span class="rthen">Humidifier ON</span><div class="rmeta">Last: Apr 18 · 12PM · 3× today</div></div>
+    <div class="rulecard"><span class="rif">IF</span> Soil &lt; 50% → <span class="rthen">Water Pump ON</span><div class="rmeta">Last: Apr 17 · 10AM · 2× today</div></div>
+  </div>
+  <button class="estop" onclick="eStop()">🛑 Emergency Stop — All Actuators OFF</button>
+</div>
+
+<!-- ═══════════════ TIMELINE ═══════════════ -->
+<div class="page" id="page-timeline">
+  <div class="card">
+    <div class="ctitle">Growth Stage Progress</div>
+    <div style="margin-bottom:13px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <span style="font-size:12.5px;font-weight:700;">🍅 Tomato — Vegetative</span>
+        <span style="font-size:10.5px;color:var(--acc);font-family:'DM Mono',monospace;">Day 18</span>
+      </div>
+      <div class="stprog"><div class="sseg done"></div><div class="sseg cur"></div><div class="sseg"></div><div class="sseg"></div></div>
+      <div style="font-size:9.5px;color:var(--t3);margin-top:3px;">Seeding ✓ → Vegetative (now) → Flowering in ~12d → Fruiting</div>
+    </div>
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <span style="font-size:12.5px;font-weight:700;">🌶️ Bell Pepper — Seedling</span>
+        <span style="font-size:10.5px;color:var(--warn);font-family:'DM Mono',monospace;">Day 7</span>
+      </div>
+      <div class="stprog"><div class="sseg cur"></div><div class="sseg"></div><div class="sseg"></div><div class="sseg"></div></div>
+      <div style="font-size:9.5px;color:var(--t3);margin-top:3px;">Seedling (now) → Vegetative in ~14d → Flowering → Fruiting</div>
+    </div>
+  </div>
+  <div class="sec-lbl">5-Day Auto Journal</div>
+  <div class="tlwrap">
+    <div class="tlentry">
+      <div class="tldot cr"></div>
+      <div class="tlcard">
+        <div class="tldate">Apr 16 — Hottest day</div>
+        <div class="tltitle">🔴 System most stressed</div>
+        <div class="tldesc">3 of 4 windows critical. Avg response: 24.5s. All conditions eventually restored. Peltier ran continuously from 11AM–12PM.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SETTINGS ═══════════════ -->
+<div class="page" id="page-settings">
+  <div class="teamcard">
+    <div class="tlogo">OBS<br>STEM</div>
+    <div>
+      <div class="tname">Team 21210 — The Ouroboros</div>
+      <div class="tdet">Obour STEM School · Grade 11<br>Moataz · Mohammed · Omar · Sohibe</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Connection</div>
+    <div class="srow">
+      <div class="srlbl"><div class="sico">📡</div>ESP32 IP address</div>
+      <span class="srval" id="esp-ip" onclick="editIP()" style="cursor:pointer;text-decoration:underline dotted;" title="Tap to edit">192.168.1.42</span>
+    </div>
+    <div class="srow" style="border-bottom:none;">
+      <div class="srlbl"><div class="sico">⏱️</div>Poll interval</div>
+      <span class="srval">every 2s</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Appearance</div>
+    <div class="srow" style="border-bottom:none;" onclick="toggleTheme()">
+      <div class="srlbl"><div class="sico" id="thico">🌙</div>Theme</div>
+      <span class="srval" id="thlbl">Light mode</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle">AI Assistant</div>
+    <div class="srow" style="border-bottom:none;" onclick="toggleChat()">
+      <div class="srlbl"><div class="sico">🐍</div>Boro — Ouroboros AI</div>
+      <span class="srval">Gemini 2.5</span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /pcontent -->
+
+<!-- BOTTOM NAV -->
+<nav class="bnav">
+  <div class="ni active" onclick="swPg('dash',this)" id="ni-dash">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.2"/><rect x="14" y="3" width="7" height="7" rx="1.2"/><rect x="3" y="14" width="7" height="7" rx="1.2"/><rect x="14" y="14" width="7" height="7" rx="1.2"/></svg>
+    <span class="nlabel">Dash</span>
+  </div>
+  <div class="ni" onclick="swPg('species',this)" id="ni-species">
+    <svg viewBox="0 0 24 24"><path d="M12 2C6 8 4 12 4 16a8 8 0 0016 0c0-4-2-8-8-14z"/><path d="M12 22V10"/></svg>
+    <span class="nlabel">Species</span>
+  </div>
+  <div class="ni" onclick="swPg('alerts',this)" id="ni-alerts">
+    <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <span class="nlabel">Alerts</span>
+    <div class="nbadge"></div>
+  </div>
+  <div class="ni" onclick="swPg('control',this)" id="ni-control">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+    <span class="nlabel">Control</span>
+  </div>
+  <div class="ni" onclick="swPg('timeline',this)" id="ni-timeline">
+    <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    <span class="nlabel">Timeline</span>
+  </div>
+  <div class="ni" onclick="swPg('settings',this)" id="ni-settings">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    <span class="nlabel">Settings</span>
+  </div>
+</nav>
+
+<!-- CHATBOT UI -->
+<div class="chat-win" id="chatWin">
+  <div class="chat-head">
+    <div class="chat-head-info">
+      <div class="chat-avatar">🐍</div>
+      <div class="chat-head-text">
+        <span class="chat-name">Boro</span>
+        <span class="chat-status">● Online · Ouroboros AI</span>
+      </div>
+    </div>
+    <span class="chat-close" onclick="toggleChat()">×</span>
+  </div>
+  <div class="chat-body" id="chatBody">
+    <div class="chat-msg ai">Hey! I'm <b>Boro</b> 🐍 — your smart greenhouse AI. Ask me anything about your plants, sensor readings, or the system status!</div>
+  </div>
+  <div class="chat-input">
+    <input type="text" id="chatInp" placeholder="Ask Boro anything..." onkeypress="if(event.key==='Enter') sendChat()">
+    <button onclick="sendChat()">↑</button>
+  </div>
+</div>
+
+<script>
+// ── ROUTING ──────────────────────────────────────────────
+const pgMeta = {
+  dash:     {t:'The Ouroboros',  s:'Live greenhouse dashboard'},
+  species:  {t:'Species Library',s:'Active greenhouse species & setpoints'},
+  alerts:   {t:'Alerts & XAI',  s:'Explainable deviation log'},
+  control:  {t:'Control Center',s:'Actuator & setpoint management'},
+  timeline: {t:'Growth Timeline',s:'Species progress & 5-day journal'},
+  settings: {t:'Settings & Profile',s:'Configuration & calibration records'}
+};
+function swPg(id, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  el.classList.add('active');
+  document.getElementById('ptitle').textContent = pgMeta[id].t;
+  document.getElementById('psub').textContent   = pgMeta[id].s;
+  document.querySelector('.pcontent').scrollTop = 0;
+  if (id === 'dash') setTimeout(drawChart, 80);
+}
+
+// ── THEME ────────────────────────────────────────────────
+let dark = false;
+function toggleTheme() {
+  dark = !dark;
+  document.body.setAttribute('data-theme', dark?'dark':'light');
+  document.getElementById('tbtn').textContent  = dark?'☀️':'🌙';
+  document.getElementById('thico').textContent = dark?'☀️':'🌙';
+  document.getElementById('thlbl').textContent = dark?'Dark mode':'Light mode';
+  drawChart();
+}
+
+function setGauge(id, val, lo, hi, color) {
+  const pct = Math.min(1, Math.max(0, (val-lo)/(hi-lo)));
+  document.getElementById(id).setAttribute('stroke-dashoffset', (94.25*(1-pct)).toFixed(2));
+  document.getElementById(id).setAttribute('stroke', color);
+}
+
+function setPill(id, on) {
+  document.getElementById(id).classList.toggle('on', on);
+}
+
+// ── LIVE DATA FETCHING ────────────────────────────────────
+let hist = { t:[],h:[],s:[],v:[] };
+
+async function fetchLiveData() {
+  try {
+    const res = await fetch('/api/data?limit=30');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.length === 0) return;
+    
+    hist = { t:[],h:[],s:[],v:[] };
+    data.forEach(d => {
+      hist.t.push(d.temperature);
+      hist.h.push(d.humidity);
+      hist.s.push(d.soil_moisture);
+      hist.v.push(d.vpd);
+    });
+
+    const curr = data[data.length - 1];
+
+    document.getElementById('v-temp').textContent = curr.temperature.toFixed(1);
+    document.getElementById('v-hum').textContent  = Math.round(curr.humidity);
+    document.getElementById('v-soil').textContent = Math.round(curr.soil_moisture);
+    document.getElementById('v-vpd').textContent  = curr.vpd.toFixed(2);
+
+    const v = curr.vpd;
+    const vz = document.getElementById('vpdzone');
+    if (v < 1.2)      { vz.textContent='Low stress'; vz.className='vpdzn lo'; }
+    else if (v <= 1.6){ vz.textContent='Optimal';    vz.className='vpdzn opt';}
+    else              { vz.textContent='High stress'; vz.className='vpdzn hi'; }
+
+    setGauge('g-temp', curr.temperature, 22, 35, '#e07a24');
+    setGauge('g-hum',  curr.humidity, 40, 90, '#2563eb');
+    setGauge('g-soil', curr.soil_moisture, 30, 90, '#52b788');
+
+    const fOn = curr.temperature > 28, hOn = curr.humidity < 55, pOn = curr.soil_moisture < 50;
+    setPill('p-fan',    fOn); setPill('p-peltier', fOn);
+    setPill('p-humid',  hOn); setPill('p-pump',    pOn);
+
+    const ms = document.getElementById('mstatus');
+    if (curr.temperature > 32 || curr.humidity < 44 || curr.soil_moisture < 41) {
+      ms.className='spill critical'; ms.innerHTML='<span class="sdot p"></span>Critical';
+    } else if (fOn||hOn||pOn) {
+      ms.className='spill warn'; ms.innerHTML='<span class="sdot p"></span>Correcting';
+    } else {
+      ms.className='spill stable'; ms.innerHTML='<span class="sdot p"></span>System Stable';
+    }
+
+    recalcPowerFromUI(fOn, hOn, pOn);
+    drawChart();
+    
+    // Hide Loader
+    const loader = document.getElementById('loaderOverlay');
+    if(loader && !loader.classList.contains('hidden')) {
+      setTimeout(() => loader.classList.add('hidden'), 2000);
+    }
+  } catch(e) { console.error("Fetch err:", e); }
+}
+
+function recalcPowerFromUI(fOn, hOn, pOn) {
+  let w = 0;
+  if (fOn || document.getElementById('tg-p').classList.contains('on')) w += 63;
+  if (hOn || document.getElementById('tg-h').classList.contains('on')) w += 1.75;
+  if (pOn || document.getElementById('tg-w').classList.contains('on')) w += 1.25;
+  document.getElementById('tdraw').textContent = w.toFixed(2)+'W';
+  document.getElementById('pbar').style.width  = (Math.min(100, w/66*100)).toFixed(1)+'%';
+}
+
+// ── CHART ────────────────────────────────────────────────
+let currentChartTab = 0;
+const cColors = ['#e07a24','#2563eb','#52b788','#9333ea'];
+const cRanges = [
+  {lo:20,hi:36,oLo:24,oHi:28},
+  {lo:40,hi:85,oLo:55,oHi:65},
+  {lo:35,hi:82,oLo:50,oHi:70},
+  {lo:0, hi:3.5,oLo:1.2,oHi:1.6}
+];
+const cKeys = ['t','h','s','v'];
+
+function cTab2(i,el) {
+  currentChartTab=i;
+  document.querySelectorAll('.ctab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  drawChart();
+}
+function cTab(i,el){ cTab2(i,el); }
+
+function drawChart() {
+  const canvas = document.getElementById('mchart');
+  if (!canvas) return;
+  const wrap = document.getElementById('chartWrap');
+  const W = wrap.offsetWidth, H = 240;
+  const dpr = window.devicePixelRatio||1;
+  canvas.width = W*dpr; canvas.height = H*dpr;
+  canvas.style.width = W+'px'; canvas.style.height = H+'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const data = hist[cKeys[currentChartTab]];
+  if (!data || data.length < 2) return;
+
+  const r = cRanges[currentChartTab], isDk = document.body.getAttribute('data-theme')==='dark';
+  const col = cColors[currentChartTab];
+  const pad = {top:16, bot:20, left:26, right:10};
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Draw Grid and Y-Axis Labels
+  ctx.strokeStyle = isDk ? '#1c261e' : '#eeecea';
+  ctx.fillStyle = varColor('--t3');
+  ctx.font = "10px 'DM Mono', monospace";
+  ctx.textAlign = "right";
+  ctx.textBaseline = "middle";
+  ctx.lineWidth = 1;
+  
+  for (let i=0; i<=4; i++) {
+    const y = pad.top + (H-pad.top-pad.bot)*i/4;
+    const val = r.hi - (r.hi-r.lo)*i/4;
+    
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W, y); ctx.stroke();
+    ctx.fillText(Number.isInteger(val)?val:val.toFixed(1), pad.left-6, y);
+  }
+
+  const yOH = pad.top + (H-pad.top-pad.bot)*(1-(r.oHi-r.lo)/(r.hi-r.lo));
+  const yOL = pad.top + (H-pad.top-pad.bot)*(1-(r.oLo-r.lo)/(r.hi-r.lo));
+  ctx.fillStyle = isDk ? 'rgba(82,183,136,.07)' : 'rgba(82,183,136,.10)';
+  ctx.fillRect(pad.left, yOH, W-pad.left, yOL-yOH);
+
+  const xs = (W-pad.left-pad.right)/(data.length-1);
+  ctx.beginPath();
+  data.forEach((v,i) => {
+    const x = pad.left + i*xs;
+    const y = pad.top + (H-pad.top-pad.bot)*(1-(v-r.lo)/(r.hi-r.lo));
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle = col; ctx.lineWidth = 2.5; ctx.lineJoin='round'; ctx.stroke();
+
+  const lx = pad.left + (data.length-1)*xs;
+  ctx.lineTo(lx,H); ctx.lineTo(pad.left,H); ctx.closePath();
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0, col+'28'); g.addColorStop(1, col+'00');
+  ctx.fillStyle=g; ctx.fill();
+
+  const lv = data[data.length-1];
+  const lyd = pad.top+(H-pad.top-pad.bot)*(1-(lv-r.lo)/(r.hi-r.lo));
+  ctx.beginPath(); ctx.arc(lx,lyd,4,0,Math.PI*2); ctx.fillStyle=col; ctx.fill();
+  ctx.beginPath(); ctx.arc(lx,lyd,8,0,Math.PI*2); ctx.fillStyle=col+'35'; ctx.fill();
+
+  // Attach Touch/Hover interactive logic
+  setupChartInteraction(wrap, pad.left, W-pad.left-pad.right, pad.top, H-pad.top-pad.bot, r, data, xs);
+}
+
+function varColor(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#9a9a8a'; }
+
+function setupChartInteraction(wrap, px, pw, py, ph, r, data, xs) {
+  const ch = document.getElementById('cCrosshair');
+  const tt = document.getElementById('cTooltip');
+  
+  function onMove(e) {
+    if(!data || data.length===0) return;
+    const rect = wrap.getBoundingClientRect();
+    const cx = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    if(cx < px || cx > px+pw+10) return onLeave();
+    
+    let idx = Math.round((cx - px) / xs);
+    idx = Math.max(0, Math.min(data.length-1, idx));
+    
+    const xPos = px + idx * xs;
+    const val = data[idx];
+    const yPos = py + ph * (1-(val-r.lo)/(r.hi-r.lo));
+    
+    ch.style.opacity = '1';
+    ch.style.left = xPos + 'px';
+    tt.style.opacity = '1';
+    tt.style.left = xPos + 'px';
+    tt.style.top = yPos + 'px';
+    tt.textContent = Number.isInteger(val)?val:val.toFixed(1);
+  }
+  function onLeave() {
+    ch.style.opacity = '0';
+    tt.style.opacity = '0';
+  }
+  
+  wrap.onmousemove = onMove;
+  wrap.ontouchmove = onMove;
+  wrap.onmouseleave = onLeave;
+  wrap.ontouchend = onLeave;
+}
+
+// ── INIT & APIS ───────────────────────────────────────────
+function tick() {
+  const n=new Date();
+  document.getElementById('clk').textContent =
+    String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+}
+tick(); setInterval(tick, 15000);
+// Restore saved ESP32 IP from localStorage
+const savedIP = localStorage.getItem('esp32ip');
+if (savedIP) {
+  const ipEl = document.getElementById('esp-ip');
+  const cipEl = document.getElementById('cip');
+  if (ipEl) ipEl.textContent = savedIP;
+  if (cipEl) cipEl.textContent = savedIP;
+}
+setInterval(fetchLiveData, 2000); // Poll every 2s
+fetchLiveData();
+setInterval(fetchAlerts, 5000); // Poll alerts every 5s
+fetchAlerts();
+window.addEventListener('resize', drawChart);
+
+// ── CHATBOT API ──
+function toggleChat() {
+  document.getElementById('chatWin').classList.toggle('open');
+}
+async function sendChat() {
+  const inp = document.getElementById('chatInp');
+  const msg = inp.value.trim();
+  if(!msg) return;
+  inp.value = '';
+  
+  const cb = document.getElementById('chatBody');
+  cb.innerHTML += `<div class="chat-msg user">${msg}</div>`;
+  cb.innerHTML += `<div class="chat-msg ai" id="typing">...<span class="typing-dot"></span><span class="typing-dot" style="animation-delay:0.2s"></span><span class="typing-dot" style="animation-delay:0.4s"></span></div>`;
+  cb.scrollTop = cb.scrollHeight;
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({message: msg})
+    });
+    const data = await res.json();
+    document.getElementById('typing').remove();
+    
+    let formattedReply = data.reply ? data.reply.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') : "Error getting response.";
+    cb.innerHTML += `<div class="chat-msg ai">${formattedReply}</div>`;
+    cb.scrollTop = cb.scrollHeight;
+  } catch(e) {
+    document.getElementById('typing').remove();
+    cb.innerHTML += `<div class="chat-msg ai" style="color:var(--danger)">Connection error. Ensure backend is running.</div>`;
+  }
+}
+
+// ── ALERTS API ──
+let lastAlertCount = 0;
+async function fetchAlerts() {
+  try {
+    const res = await fetch('/api/alerts?limit=20');
+    if(!res.ok) return;
+    const alerts = await res.json();
+    const container = document.getElementById('dynamic-alerts');
+    if(!container) return;
+
+    // Update nav badge dynamically
+    const badge = document.querySelector('#ni-alerts .nbadge');
+    if(badge) {
+      const newCount = alerts.length;
+      badge.style.display = newCount > 0 ? 'block' : 'none';
+      if(newCount > lastAlertCount) badge.style.animation = 'pd 0.5s ease';
+      lastAlertCount = newCount;
+    }
+    
+    if(alerts.length === 0) {
+      container.innerHTML = '<div style="font-size:12px;color:var(--t3);text-align:center;padding:30px;">✅ No alerts — system running normally</div>';
+      return;
+    }
+    let html = '';
+    alerts.forEach(a => {
+      const timeStr = new Date(a.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+      const dateStr = new Date(a.timestamp).toLocaleDateString([], {month: 'short', day:'numeric'});
+      let colorClass = '';
+      if(a.severity === 'danger') colorClass = 'd';
+      else if(a.severity === 'warn') colorClass = 'w';
+      else if(a.severity === 'info') colorClass = 'i';
+      let tagsHtml = '';
+      if(a.tags) {
+        a.tags.split(',').forEach(tag => {
+          tagsHtml += `<span class="atag">${tag.trim()}</span>`;
+        });
+      }
+      html += `
+      <div class="altcard ${colorClass}">
+        <div class="alth"><span class="alttitle">${a.title}</span><span class="altres">AI Auto-Log</span></div>
+        <div class="alttime">${dateStr} · ${timeStr}</div>
+        <div class="xaibox">${a.explanation}</div>
+        <div class="atags">${tagsHtml}</div>
+      </div>`;
+    });
+    container.innerHTML = html;
+  } catch(e) { console.error("Alerts fetch err:", e); }
+}
+
+async function clearAlerts() {
+  try {
+    await fetch('/api/alerts/clear', { method: 'DELETE' });
+    document.getElementById('dynamic-alerts').innerHTML = '<div style="font-size:12px;color:var(--t3);text-align:center;padding:30px;">✅ Alerts cleared</div>';
+    lastAlertCount = 0;
+    const badge = document.querySelector('#ni-alerts .nbadge');
+    if(badge) badge.style.display = 'none';
+  } catch(e) { console.error('Clear err:', e); }
+}
+
+function editIP() {
+  const el = document.getElementById('esp-ip');
+  const cur = el.textContent;
+  const inp = document.createElement('input');
+  inp.value = cur;
+  inp.style.cssText = 'border:1px solid var(--acc);border-radius:6px;padding:2px 6px;font-family:DM Mono,monospace;font-size:11px;background:var(--bg);color:var(--t1);width:110px;';
+  inp.onblur = () => { 
+    const v = inp.value.trim() || cur;
+    el.textContent = v;
+    el.parentNode.replaceChild(el, inp);
+    localStorage.setItem('esp32ip', v);
+    document.getElementById('cip').textContent = v;
+  };
+  inp.onkeydown = (e) => { if(e.key==='Enter') inp.blur(); };
+  el.parentNode.replaceChild(inp, el);
+  inp.focus(); inp.select();
+}
+
+// ── SPECIES & CONTROL BOILERPLATE ──
+const spDB = {
+  tomato: {
+    nm:'Tomato', sci:'Solanum lycopersicum', ico:'🍅', comp:74, cnote:'Good — temp slightly elevated',
+    st:[
+      {t:'18–22°C',h:'70–80%',s:'65–75%',v:'0.6–1.0 kPa',tb:44,hb:75,sb:68,vb:28},
+      {t:'21–27°C',h:'65–75%',s:'60–80%',v:'0.8–1.2 kPa',tb:60,hb:68,sb:63,vb:40},
+      {t:'22–28°C',h:'60–70%',s:'60–75%',v:'1.0–1.5 kPa',tb:65,hb:62,sb:60,vb:50},
+      {t:'22–26°C',h:'55–65%',s:'55–70%',v:'0.8–1.2 kPa',tb:54,hb:57,sb:57,vb:40}
+    ]
+  },
+  pepper: {
+    nm:'Bell Pepper', sci:'Capsicum annuum', ico:'🌶️', comp:68, cnote:'Moderate — humidity below range',
+    st:[
+      {t:'20–25°C',h:'70–80%',s:'60–70%',v:'0.6–1.0 kPa',tb:50,hb:75,sb:62,vb:28},
+      {t:'22–28°C',h:'65–75%',s:'55–70%',v:'0.8–1.3 kPa',tb:62,hb:68,sb:59,vb:42},
+      {t:'23–29°C',h:'60–70%',s:'55–68%',v:'1.0–1.5 kPa',tb:67,hb:63,sb:57,vb:50},
+      {t:'21–27°C',h:'55–65%',s:'55–65%',v:'0.8–1.2 kPa',tb:56,hb:57,sb:57,vb:40}
+    ]
+  }
+};
+let curSp='tomato', curSt=1;
+
+function swSp(id, el) {
+  curSp=id;
+  document.querySelectorAll('.sptbtn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  curSt=1;
+  document.querySelectorAll('.stbtn').forEach((b,i)=>b.classList.toggle('active',i===1));
+  renderSp();
+}
+function swSt(i, el) {
+  curSt=i;
+  document.querySelectorAll('.stbtn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderSp();
+}
+function renderSp() {
+  const sp=spDB[curSp], st=sp.st[curSt];
+  document.getElementById('sp-ico').textContent = sp.ico;
+  document.getElementById('sp-nm').textContent  = sp.nm;
+  document.getElementById('sp-sci').textContent = sp.sci;
+  document.getElementById('csc').textContent    = sp.comp+'%';
+  document.getElementById('cscnote').textContent= sp.cnote;
+  document.getElementById('cbar').style.width   = sp.comp+'%';
+  document.getElementById('sv-t').textContent=st.t; document.getElementById('sb-t').style.width=st.tb+'%';
+  document.getElementById('sv-h').textContent=st.h; document.getElementById('sb-h').style.width=st.hb+'%';
+  document.getElementById('sv-s').textContent=st.s; document.getElementById('sb-s').style.width=st.sb+'%';
+  document.getElementById('sv-v').textContent=st.v; document.getElementById('sb-v').style.width=st.vb+'%';
+}
+async function applySetpoints() {
+  const btn = document.querySelector('#page-species .applybtn');
+  const og = btn.innerHTML;
+  btn.innerHTML = '<span>Pushing setpoints...</span>';
+  try {
+    await fetch('/api/setpoints', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({source: 'species_profile', setpoints: {species: curSp, stage: curSt, target: spDB[curSp].st[curSt]}})
+    });
+    btn.innerHTML = '<span>✔ Setpoints Active</span>';
+    setTimeout(() => btn.innerHTML = og, 2000);
+  } catch(e) { btn.innerHTML = og; alert('Network error'); }
+}
+
+async function saveManualSetpoints(btn) {
+  const og = btn.innerHTML;
+  btn.innerHTML = 'Saving...';
+  const t = document.getElementById('inp-t').value;
+  const h = document.getElementById('inp-h').value;
+  const s = document.getElementById('inp-s').value;
+  try {
+    await fetch('/api/setpoints', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({source: 'manual_sliders', setpoints: {tempMax: t, humMin: h, soilMin: s}})
+    });
+    btn.innerHTML = '✔ Saved';
+    setTimeout(() => btn.innerHTML = og, 2000);
+  } catch(e) { btn.innerHTML = og; alert('Network error'); }
+}
+
+const as = {p:false, h:true, w:false};
+async function togAct(id) {
+  as[id]=!as[id];
+  document.getElementById('tg-'+id).classList.toggle('on', as[id]);
+  try {
+    await fetch('/api/command', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({command: 'toggle_actuator', payload: {id, state: as[id]}})
+    });
+  } catch(e) { console.error('Error toggling', id); }
+}
+
+async function swMode(m) {
+  const isAuto = m==='auto';
+  document.getElementById('m-auto').classList.toggle('active', isAuto);
+  document.getElementById('m-man').classList.toggle('active', !isAuto);
+  document.getElementById('rules-section').style.display = isAuto?'block':'none';
+  try {
+    await fetch('/api/command', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({command: 'switch_mode', payload: {mode: m}})
+    });
+  } catch(e) { console.error('Error switching mode'); }
+}
+
+async function eStop() {
+  const btn = document.querySelector('.estop');
+  const og = btn.innerHTML;
+  btn.innerHTML = '🛑 STOPPING...';
+  try {
+    await fetch('/api/command', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({command: 'emergency_stop', payload: {}})
+    });
+    btn.innerHTML = '✔ ALL STOPPED';
+    setTimeout(() => btn.innerHTML = og, 2000);
+  } catch(e) { btn.innerHTML = og; alert('Network error'); }
+}
+</script>
+</body>
+</html>
