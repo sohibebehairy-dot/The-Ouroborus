@@ -252,7 +252,7 @@ input[type=range]{flex:1;margin:0 10px;accent-color:var(--acc);height:4px}
 <!-- LOADING SCREEN -->
 <div class="loader-overlay" id="loaderOverlay">
   <img src="ouroboros_logo.png" alt="Ouroboros Logo" class="ouroboros-img">
-  <div class="loader-text">Initializing AI Core...</div>
+  <div class="loader-text">Initializing Ouroboros</div>
 </div>
 
 <!-- STATUS BAR -->
@@ -507,39 +507,6 @@ input[type=range]{flex:1;margin:0 10px;accent-color:var(--acc);height:4px}
   <button class="estop" onclick="eStop()">🛑 Emergency Stop — All Actuators OFF</button>
 </div>
 
-<!-- ═══════════════ TIMELINE ═══════════════ -->
-<div class="page" id="page-timeline">
-  <div class="card">
-    <div class="ctitle">Growth Stage Progress</div>
-    <div style="margin-bottom:13px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
-        <span style="font-size:12.5px;font-weight:700;">🍅 Tomato — Vegetative</span>
-        <span style="font-size:10.5px;color:var(--acc);font-family:'DM Mono',monospace;">Day 18</span>
-      </div>
-      <div class="stprog"><div class="sseg done"></div><div class="sseg cur"></div><div class="sseg"></div><div class="sseg"></div></div>
-      <div style="font-size:9.5px;color:var(--t3);margin-top:3px;">Seeding ✓ → Vegetative (now) → Flowering in ~12d → Fruiting</div>
-    </div>
-    <div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
-        <span style="font-size:12.5px;font-weight:700;">🌶️ Bell Pepper — Seedling</span>
-        <span style="font-size:10.5px;color:var(--warn);font-family:'DM Mono',monospace;">Day 7</span>
-      </div>
-      <div class="stprog"><div class="sseg cur"></div><div class="sseg"></div><div class="sseg"></div><div class="sseg"></div></div>
-      <div style="font-size:9.5px;color:var(--t3);margin-top:3px;">Seedling (now) → Vegetative in ~14d → Flowering → Fruiting</div>
-    </div>
-  </div>
-  <div class="sec-lbl">5-Day Auto Journal</div>
-  <div class="tlwrap">
-    <div class="tlentry">
-      <div class="tldot cr"></div>
-      <div class="tlcard">
-        <div class="tldate">Apr 16 — Hottest day</div>
-        <div class="tltitle">🔴 System most stressed</div>
-        <div class="tldesc">3 of 4 windows critical. Avg response: 24.5s. All conditions eventually restored. Peltier ran continuously from 11AM–12PM.</div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- ═══════════════ SETTINGS ═══════════════ -->
 <div class="page" id="page-settings">
@@ -598,10 +565,7 @@ input[type=range]{flex:1;margin:0 10px;accent-color:var(--acc);height:4px}
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
     <span class="nlabel">Control</span>
   </div>
-  <div class="ni" onclick="swPg('timeline',this)" id="ni-timeline">
-    <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-    <span class="nlabel">Timeline</span>
-  </div>
+
   <div class="ni" onclick="swPg('settings',this)" id="ni-settings">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
     <span class="nlabel">Settings</span>
@@ -636,7 +600,7 @@ const pgMeta = {
   species:  {t:'Species Library',s:'Active greenhouse species & setpoints'},
   alerts:   {t:'Alerts & XAI',  s:'Explainable deviation log'},
   control:  {t:'Control Center',s:'Actuator & setpoint management'},
-  timeline: {t:'Growth Timeline',s:'Species progress & 5-day journal'},
+
   settings: {t:'Settings & Profile',s:'Configuration & calibration records'}
 };
 function swPg(id, el) {
@@ -1202,7 +1166,13 @@ async function saveManualSetpoints(btn) {
 }
 
 const as = {p:false, h:true, w:false};
+let currentMode = 'auto'; // Default state
+
 async function togAct(id) {
+  if (currentMode === 'auto') {
+    alert("Controls are disabled in Automatic mode. Switch to Manual to override.");
+    return;
+  }
   vibe();
   as[id]=!as[id];
   document.getElementById('tg-'+id).classList.toggle('on', as[id]);
@@ -1215,11 +1185,20 @@ async function togAct(id) {
 }
 
 async function swMode(m) {
+  currentMode = m;
   vibe();
   const isAuto = m==='auto';
   document.getElementById('m-auto').classList.toggle('active', isAuto);
   document.getElementById('m-man').classList.toggle('active', !isAuto);
-  document.getElementById('rules-section').style.display = isAuto?'block':'none';
+  
+  const rulesSection = document.getElementById('rules-section');
+  if(rulesSection) rulesSection.style.display = isAuto ? 'block' : 'none';
+  
+  document.querySelectorAll('.tgl').forEach(tgl => {
+    tgl.style.opacity = isAuto ? '0.5' : '1';
+    tgl.style.cursor = isAuto ? 'not-allowed' : 'pointer';
+  });
+
   try {
     await fetch('/api/command', {
       method:'POST', headers:{'Content-Type':'application/json'},
