@@ -157,6 +157,8 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--t1);max-wi
 .mbtn{flex:1;padding:9px;border-radius:9px;border:none;font-size:12.5px;font-weight:600;cursor:pointer;background:transparent;color:var(--t3);transition:all .25s;font-family:'Outfit',sans-serif}
 .mbtn.active{background:var(--card);color:var(--acc);box-shadow:var(--shadow)}
 .actcard{display:flex;align-items:center;padding:14px 16px;background:var(--card);border-radius:13px;border:1px solid var(--border);margin-bottom:9px;gap:13px;box-shadow:var(--shadow)}
+.actcard.disabled{position:relative;overflow:hidden;border-color:transparent;box-shadow:none;}
+.actcard.disabled::after{content:'';position:absolute;inset:0;background:rgba(180,180,180,0.1);backdrop-filter:grayscale(1) contrast(0.7);pointer-events:none;}
 .aiwrap{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
 .aiwrap.p{background:#dbeafe}.aiwrap.h{background:#e0f2fe}.aiwrap.w{background:#dcfce7}
 [data-theme=dark] .aiwrap.p{background:#1e3a5f}[data-theme=dark] .aiwrap.h{background:#0c2340}[data-theme=dark] .aiwrap.w{background:#0a2818}
@@ -1194,9 +1196,8 @@ async function swMode(m) {
   const rulesSection = document.getElementById('rules-section');
   if(rulesSection) rulesSection.style.display = isAuto ? 'block' : 'none';
   
-  document.querySelectorAll('.tgl').forEach(tgl => {
-    tgl.style.opacity = isAuto ? '0.5' : '1';
-    tgl.style.cursor = isAuto ? 'not-allowed' : 'pointer';
+  document.querySelectorAll('.actcard').forEach(card => {
+    card.classList.toggle('disabled', isAuto);
   });
 
   try {
